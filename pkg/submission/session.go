@@ -6,6 +6,7 @@ import (
 	"io"
 	"io/ioutil"
 	"net/textproto"
+	"runtime/debug"
 	"strings"
 )
 
@@ -60,15 +61,23 @@ type Session struct {
 
 // Run initiates a mail submission session.
 func (s *Session) Run() {
+	// Any panics during a session should be recovered we don't bring down the
+	// whole server because of one naughty connection.
+	defer func() {
+		if r := recover(); r != nil {
+			fmt.Println("Session panicked:", string(debug.Stack()))
+		}
+	}()
 	defer s.conn.Close()
+
 	s.Greet()
 
 	for {
 		s.lmt.N = LINELIMIT
 		cmd, err := s.buf.Peek(4)
 		if err != nil {
-			// TODO: recover from session panic
-			panic(err)
+			// Whelp, not sure we're recovering from this one
+			return
 		}
 
 		// Must accept commands in a case insensitive fashion
@@ -156,7 +165,7 @@ func (s *Session) NotImplemented() {
 
 func (s *Session) ExtendedHello() {
 	if s.state != stateStart {
-		fmt.Fprintf(s.conn, "503 Talaria only accepts EHLO at the start of a session")
+		fmt.Fprint(s.conn, "503 Talaria only accepts EHLO at the start of a session\r\n")
 		return
 	}
 
@@ -169,7 +178,7 @@ func (s *Session) ExtendedHello() {
 		fmt.Fprintf(s.conn, "500 I don't understand\r\n")
 
 	case !strings.HasSuffix(cmd, "\r\n"):
-		fmt.Fprintf(s.conn, "501 EHLO must end with CRLF")
+		fmt.Fprintf(s.conn, "501 EHLO must end with CRLF\r\n")
 
 	default:
 		fmt.Fprintf(s.conn, "250-%s Arrrr, gimme yer mail\r\n", s.hostname)
@@ -183,36 +192,144 @@ func (s *Session) ExtendedHello() {
 func (s *Session) Authenticate() {
 	// TODO: Implement me
 	s.buf.ReadString('\n')
-	fmt.Fprint(s.conn, "235 2.7.0 Authentication successful\r\n")
+	fmt.Fprint(s.conn, "235 I didn't do anything\r\n")
+	s.state = stateAuthenticated
 }
 
 func (s *Session) Mail() {
-	// TODO: Implement me
-	s.buf.ReadString('\n')
-	fmt.Fprint(s.conn, "250 Ok\r\n")
+	if s.state != stateAuthenticated {
+		s.buf.ReadString('\n')
+		fmt.Fprint(s.conn, "503 Not authenticated")
+		return
+	}
+
+	cmd, err := s.buf.ReadString('\n')
+	switch {
+	case err == io.EOF:
+		fmt.Fprintf(s.conn, "500 Line too long. Cut down those MAIL params\r\n")
+
+	case err != nil:
+		fmt.Fprintf(s.conn, "500 I don't even know how you failed here\r\n")
+
+	case !(strings.HasSuffix(cmd, "\r\n") && strings.HasPrefix(cmd, "MAIL FROM:")):
+		fmt.Fprintf(s.conn, "501 Bad format in your mail command\r\n")
+
+	default:
+		cmd = strings.TrimPrefix(cmd, "MAIL FROM:")
+		cmd = strings.TrimSuffix(cmd, "\r\n")
+		parts := strings.Split(cmd, " ")
+
+		// TODO: check if this sender is acceptable
+		s.from = parts[0]
+
+		fmt.Fprint(s.conn, "250 Ok\r\n")
+		s.state = stateMail
+	}
 }
 
 func (s *Session) Recipient() {
-	// TODO: Implement me
-	s.buf.ReadString('\n')
-	fmt.Fprint(s.conn, "250 Ok\r\n")
+	if !(s.state == stateRcpt || s.state == stateMail) {
+		s.buf.ReadString('\n')
+		fmt.Fprint(s.conn, "503 Need do MAIL before adding recipients\r\n")
+		return
+	}
+
+	cmd, err := s.buf.ReadString('\n')
+	switch {
+	case err == io.EOF:
+		fmt.Fprintf(s.conn, "500 Line too long. Cut down those MAIL params\r\n")
+
+	case err != nil:
+		fmt.Fprintf(s.conn, "500 I don't even know how you failed here\r\n")
+
+	case !(strings.HasSuffix(cmd, "\r\n") && strings.HasPrefix(cmd, "RCPT TO:")):
+		fmt.Fprintf(s.conn, "501 Bad format in your mail command\r\n")
+
+	default:
+		cmd = strings.TrimPrefix(cmd, "RCPT TO:")
+		cmd = strings.TrimSuffix(cmd, "\r\n")
+		parts := strings.Split(cmd, " ")
+
+		// TODO: Bring this up to spec. Strip weird routing information out etc...
+		s.recipients = append(s.recipients, parts[0])
+
+		fmt.Fprint(s.conn, "250 Ok\r\n")
+
+		s.state = stateRcpt
+	}
+
 }
 
 func (s *Session) Data() {
-	// TODO: Implement me
-	s.buf.ReadString('\n')
-	fmt.Fprint(s.conn, "354 Do your thing\r\n")
-	dr := textproto.NewReader(s.buf).DotReader()
-	msg, err := ioutil.ReadAll(dr)
-	if err != nil {
-		panic(err)
+	if s.state != stateRcpt {
+		s.buf.ReadString('\n')
+		fmt.Fprint(s.conn, "503 No recipients recieved yet\r\n")
+		return
 	}
-	fmt.Println(string(msg))
-	fmt.Fprint(s.conn, "250 Ahoy! Mail time!\r\n")
+
+	cmd, err := s.buf.ReadString('\n')
+	switch {
+	case err == io.EOF:
+		fmt.Fprint(s.conn, "500 Gees long line for a reset huh?\r\n")
+
+	case err != nil:
+		fmt.Fprint(s.conn, "500 I don't even know how you failed here\r\n")
+
+	case strings.ToUpper(cmd) != "DATA\r\n":
+		fmt.Fprint(s.conn, "501 No args in a data! What did you do?\r\n")
+
+	default:
+		fmt.Fprint(s.conn, "354 Do your thing\r\n")
+
+		// Set the limit reader to the /larger/ body limit
+		s.lmt.N = BODYLIMIT
+		msg, err := ioutil.ReadAll(textproto.NewReader(s.buf).DotReader())
+		if err != nil {
+			panic(err)
+		}
+
+		s.msg = msg
+
+		// TODO: Pass mail off to MTA
+		fmt.Println("From:", s.from)
+		fmt.Printf("To:%v\n", s.recipients)
+		fmt.Println("Message:", string(s.msg))
+
+		fmt.Fprint(s.conn, "250 Boom baby. Email accepted\r\n")
+
+		// Reset state
+		s.from = ""
+		s.recipients = nil
+		s.msg = nil
+		s.state = stateAuthenticated
+	}
 }
 
 func (s *Session) Reset() {
-	// TODO: Implement me
+	cmd, err := s.buf.ReadString('\n')
+	switch {
+	case err == io.EOF:
+		fmt.Fprintf(s.conn, "500 Gees long line for a reset huh?\r\n")
+
+	case err != nil:
+		fmt.Fprintf(s.conn, "500 I don't even know how you failed here\r\n")
+
+	case strings.ToUpper(cmd) != "RSET\r\n":
+		fmt.Fprintf(s.conn, "501 No args in a reset! What did you do?\r\n")
+
+	default:
+		for _, state := range [3]int{stateStart, stateEhlo, stateAuthenticated} {
+			if s.state == state {
+				return
+			}
+		}
+
+		s.from = ""
+		s.recipients = nil
+		s.msg = nil
+
+		s.state = stateAuthenticated
+	}
 }
 
 func (s *Session) Noop() {
@@ -250,4 +367,12 @@ func (s *Session) Quit() {
 }
 
 func (s *Session) BadRequest() {
+	_, err := s.buf.ReadString('\n')
+	switch {
+	case err == io.EOF:
+		fmt.Fprint(s.conn, "500 Whoa there, the line is too long /and/ unrecognized command\r\n")
+
+	default:
+		fmt.Fprint(s.conn, "500 Command not recognized\r\n")
+	}
 }
