@@ -32,10 +32,19 @@ func (s *Server) ListenAndServe() error {
 }
 
 func (s *Server) NewSession(conn io.ReadWriteCloser) Session {
-	session := Session{
-		conn: conn,
-		lmt:  io.LimitedReader{R: conn, N: LINELIMIT},
+	hostname, _, err := net.SplitHostPort(s.Addr)
+	if err != nil {
+		// Shouldn't have gotten this far with an invalid address. Lets just
+		// freak out
+		panic(err)
 	}
+
+	session := Session{
+		conn:     conn,
+		lmt:      io.LimitedReader{R: conn, N: LINELIMIT},
+		hostname: hostname,
+	}
+
 	session.buf = bufio.NewReader(&session.lmt)
 	return session
 }
