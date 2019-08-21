@@ -115,12 +115,10 @@ func (s *Session) Run() {
 
 		// https://tools.ietf.org/html/rfc5321#section-4.1.1.4
 		case "DATA":
-			// TODO: Implement me
 			s.Data()
 
 		// https://tools.ietf.org/html/rfc5321#section-4.1.1.5
 		case "RSET":
-			// TODO: Implement me
 			s.Reset()
 
 		// https://tools.ietf.org/html/rfc5321#section-4.1.1.6
