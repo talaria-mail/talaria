@@ -15,5 +15,3 @@ it easy for you to host your own email.
 - Exhaustive compliance with all protocols
 - High scalability or high availability
 
-
-

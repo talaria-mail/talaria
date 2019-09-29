@@ -10,15 +10,26 @@ we need here to build a robust set of functionality around?
 We need a message structure:
 
 ```Go
+import "net/mail"
+
 type Message struct {
-    Headers
-    Body
+    // Mutable metadata
+    Metadata struct {
+        Mailbox string
+        ID uint
+        Flags uint
+        // Probably more fields here...
+    }
+
+    // Immutable message
+    Header mail.Header
+    Body []byte
 }
 ```
 
 And we'd like to flush out those MTA and MSA interfaces:
 
-```
+```Go
 type Sender interface {
     Send(m Message) error
 }
@@ -39,7 +50,7 @@ func DKIMSign(key []byte, s Sender) Sender {
     return func (m Message) error {
         m := dkim.Sign(key, m)
         return s.Send(m)
-    } 
+    }
 }
 ```
 
@@ -69,5 +80,21 @@ reading and deleting interface that the IMAP protocol presents to mail clients.
 This is tricky because the interface must be rich enough to implement something
 as complex as the IMAP protocol.
 
-> Note: Maybe the best approach here is to simply implement the IMAP interface
-> first and then try to abstract post mortem?
+With a problem like this, perhaps it is best to defer the trouble of complexity
+to the caller.  Who knows what functionality IMAP could need? How do we ensure
+that we can deal with extensions in the future? Generically, we need to select
+and delete messages. Lets allow those functions to take a filter function so
+they remain fairly flexibly:
+
+```Go
+type FilterFunc func(m Message) bool
+
+type Repository interface {
+    Receiver
+    Select(f FilterFunc) chan Message
+    Delete(f FilterFunc) uint
+    Count(f FilterFunc) uint
+}
+```
+
+Hmm. Ok we have an `email.Repository`. Seems like a good foundation for now.
