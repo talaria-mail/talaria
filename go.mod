@@ -1,3 +1,3 @@
-module code.nfsmith.ca/talaria
+module code.nfsmith.ca/nsmith/talaria
 
 go 1.12

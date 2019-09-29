@@ -3,12 +3,13 @@ package main
 import (
 	"fmt"
 
-	"code.nfsmith.ca/talaria/pkg/submission"
+	"code.nfsmith.ca/nsmith/talaria/pkg/submission"
 )
 
 func main() {
-	var sub submission.Server
-	sub.Addr = "localhost:2525"
+    var sub submission.Server
+    sub.Addr = "0.0.0.0:2525"
 
-	fmt.Println(sub.ListenAndServe())
+    fmt.Println("Binding submission server to port :2525....")
+    sub.ListenAndServe()
 }
