@@ -6,7 +6,6 @@ import (
 	"io"
 	"io/ioutil"
 	"net/textproto"
-	"runtime/debug"
 	"strings"
 )
 
@@ -65,7 +64,7 @@ func (s *Session) Run() {
 	// whole server because of one naughty connection.
 	defer func() {
 		if r := recover(); r != nil {
-			fmt.Println("Session panicked:", string(debug.Stack()))
+			fmt.Println("submission session panicked:", r)
 		}
 	}()
 	defer s.conn.Close()
