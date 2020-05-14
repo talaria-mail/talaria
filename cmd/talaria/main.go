@@ -3,8 +3,7 @@ package main
 import (
 	"fmt"
 
-	"code.nfsmith.ca/nsmith/talaria/pkg/submission"
-	"code.nfsmith.ca/talaria/pkg/submission"
+	"github.com/nsmith5/talaria/pkg/submission"
 )
 
 func main() {
