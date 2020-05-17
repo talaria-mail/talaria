@@ -1,5 +1,7 @@
 # Talaria
 
+[![Build Status](https://cloud.drone.io/api/badges/nsmith5/talaria/status.svg)](https://cloud.drone.io/nsmith5/talaria)
+
 Talaria is an effort to create an email server that goes out of its way to make
 it easy for you to host your own email.
 
