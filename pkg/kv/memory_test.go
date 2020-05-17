@@ -24,6 +24,16 @@ func TestBasics(t *testing.T) {
 	if equal := bytes.Compare(returned, value); equal != 0 {
 		t.Error("Input doesn't match output")
 	}
+
+	err = kv.Delete(ctx, "key")
+	if err != nil {
+		t.Error("Failed to delete key")
+	}
+
+	err = kv.Delete(ctx, "key")
+	if err != ErrorNotFound {
+		t.Error("Should fail on delete with no found")
+	}
 }
 
 func TestCancelation(t *testing.T) {
@@ -41,5 +51,10 @@ func TestCancelation(t *testing.T) {
 	value, err = kv.Get(ctx, "key")
 	if err != context.Canceled {
 		t.Error("Should have failed to get on cancelled")
+	}
+
+	err = kv.Delete(ctx, "key")
+	if err != context.Canceled {
+		t.Error("Should have failed with canceled")
 	}
 }

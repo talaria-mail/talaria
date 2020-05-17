@@ -59,3 +59,16 @@ func (b *boltKV) Put(ctx context.Context, key string, value []byte) error {
 		return err
 	}
 }
+
+func (b *boltKV) Delete(ctx context.Context, key string) error {
+	select {
+	case <-ctx.Done():
+		return ctx.Err()
+	default:
+		err := b.Update(func(tx *bolt.Tx) error {
+			bkt := tx.Bucket(b.bucket)
+			return bkt.Delete([]byte(key))
+		})
+		return err
+	}
+}

@@ -32,3 +32,17 @@ func (m memKV) Put(ctx context.Context, key string, value []byte) error {
 		return nil
 	}
 }
+
+func (m memKV) Delete(ctx context.Context, key string) error {
+	select {
+	case <-ctx.Done():
+		return ctx.Err()
+	default:
+		_, ok := m[key]
+		if !ok {
+			return ErrorNotFound
+		}
+		delete(m, key)
+		return nil
+	}
+}
