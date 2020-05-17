@@ -4,4 +4,5 @@ steps:
 - name: test
   image: golang:1.13.0
   commands:
-  - go test ./...
+  - go get -v
+  - go test -v -cover ./...

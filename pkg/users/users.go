@@ -15,7 +15,7 @@ type User struct {
 	Aliases      []string
 }
 
-type UserService interface {
+type Service interface {
 	Create(context.Context, User) error
 	Fetch(ctx context.Context, username string) (*User, error)
 	Update(context.Context, User) error
@@ -26,7 +26,7 @@ type kvService struct {
 	kv.Store
 }
 
-func NewUserService(store kv.Store) UserService {
+func NewService(store kv.Store) Service {
 	return &kvService{store}
 }
 

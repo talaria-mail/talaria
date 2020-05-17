@@ -20,7 +20,7 @@ func TestCRUD(t *testing.T) {
 	}
 
 	store := kv.NewMemStore()
-	us := NewUserService(store)
+	us := NewService(store)
 
 	ctx := context.Background()
 
@@ -49,13 +49,11 @@ func TestCRUD(t *testing.T) {
 		t.Error("Failed to delete user")
 	}
 
-	/*
-		ctx2, cancel := context.WithCancel(ctx)
-		cancel()
+	ctx, cancel := context.WithCancel(ctx)
+	cancel()
 
-		err = us.Delete(ctx, user.Username)
-		if err != context.Canceled {
-			t.Error("Should failed as cancelled")
-		}
-	*/
+	err = us.Delete(ctx, user.Username)
+	if err != context.Canceled {
+		t.Error("Should failed as cancelled")
+	}
 }
