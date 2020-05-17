@@ -1,15 +1,14 @@
 package main
 
 import (
-	"fmt"
-
-	"github.com/nsmith5/talaria/pkg/submission"
+	"github.com/spf13/cobra"
 )
 
-func main() {
-	var sub submission.Server
-	sub.Addr = "0.0.0.0:2525"
+var cmd = &cobra.Command{
+	Use:   "talaria",
+	Short: "Simple and efficient Email server",
+}
 
-	fmt.Println("Binding submission server to port :2525....")
-	sub.ListenAndServe()
+func main() {
+	cmd.Execute()
 }
