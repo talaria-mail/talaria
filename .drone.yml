@@ -5,3 +5,9 @@ steps:
   image: golang:1.14
   commands:
   - go test -v -cover ./...
+steps:
+- name: frontend
+  image: node:12
+  commands:
+  - cd frontend
+  - yarn build
