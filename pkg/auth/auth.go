@@ -11,8 +11,8 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-// Authenticator handles login requests and returns JSON web tokens in exchange
-// for credentials.
+// Authenticator handles login requests and returns JSON web tokens in
+// exchange for credentials.
 //
 // Tokens are signed via elliptical curve crypto (for shorter tokens). This
 // also means that public keys can be distributed to all middlewares and other
