@@ -1,21 +1,16 @@
 kind: pipeline
 name: default
-
 steps:
 - name: test
   image: golang:1.14
   commands:
   - go test -v -cover ./...
-
-steps:
 - name: frontend
   image: node:12
   commands:
   - cd frontend
   - yarn install
   - yarn build
-
-steps:
 - name: docker
   image: plugins/docker
   settings:
