@@ -4,7 +4,7 @@ steps:
 - name: test
   image: golang:1.14
   commands:
-  - go test -v -cover ./...
+  - go test -v -cover ./pkg/...
 - name: frontend
   image: node:12
   commands:
