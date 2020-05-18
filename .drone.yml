@@ -1,10 +1,12 @@
 kind: pipeline
 name: default
+
 steps:
 - name: test
   image: golang:1.14
   commands:
   - go test -v -cover ./...
+
 steps:
 - name: frontend
   image: node:12
@@ -12,3 +14,18 @@ steps:
   - cd frontend
   - yarn install
   - yarn build
+
+steps:
+- name: docker
+  image: plugins/docker
+  settings:
+    repo: nsmith5/talaria
+    auto_tag: true
+    auto_tag_suffix: linux-amd64
+    username:
+      from_secret: dockerhub_username
+    password:
+      from_secret: dockerhub_password
+  when:
+    branch:
+    - master
