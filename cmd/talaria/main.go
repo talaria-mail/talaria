@@ -10,5 +10,6 @@ var cmd = &cobra.Command{
 }
 
 func main() {
+	cmd.AddCommand(serverCmd)
 	cmd.Execute()
 }
