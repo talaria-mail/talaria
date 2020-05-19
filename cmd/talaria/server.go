@@ -13,9 +13,9 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/nsmith5/talaria/pkg/api"
 	"github.com/nsmith5/talaria/pkg/auth"
 	"github.com/nsmith5/talaria/pkg/kv"
+	"github.com/nsmith5/talaria/pkg/transport/grpc"
 	"github.com/nsmith5/talaria/pkg/users"
 
 	"github.com/oklog/run"
@@ -59,7 +59,7 @@ func runServerCmd(cmd *cobra.Command, args []string) {
 
 	var backend http.Handler
 	{
-		backend = api.New(as)
+		backend = grpc.NewServer(as)
 	}
 
 	var g run.Group
