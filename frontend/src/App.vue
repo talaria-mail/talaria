@@ -55,6 +55,7 @@ export default {
         req.setUsername(this.username);
         req.setPassword(this.password);
         this.client.login(req, {}, (err, resp) => {
+            console.log(err); 
             this.token = resp.ToObject().Token;
             console.log(this.token); 
         });

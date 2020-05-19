@@ -5,6 +5,7 @@ import (
 
 	"github.com/improbable-eng/grpc-web/go/grpcweb"
 	"github.com/nsmith5/talaria/pkg/auth"
+	"github.com/rs/cors"
 	"google.golang.org/grpc"
 )
 
@@ -14,5 +15,6 @@ func NewServer(authenticator auth.Authenticator) http.Handler {
 	as := NewAuthServer(authenticator)
 	RegisterAuthServer(s, as)
 
-	return grpcweb.WrapServer(s)
+	c := cors.AllowAll()
+	return c.Handler(grpcweb.WrapServer(s))
 }
