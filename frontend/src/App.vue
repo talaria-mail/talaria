@@ -1,10 +1,11 @@
 <template>
   <div id="app">
     <section>
-      <span class="title-text">TODO gRPC Client</span>
+      <span class="title-text">Login</span>
       <div class="row justify-content-center mt-4">
-        <input v-model="inputField" v-on:keyup.enter="addTodo" class="mr-1" placeholder="Todo Item">
-        <button @click="addTodo" class="btn btn-primary">Add Todo</button>
+        <input v-model="username" v-on:keyup.enter="login" class="mr-1" placeholder="Todo Item">
+        <input v-model="password" v-on:keyup.enter="login" class="mr=1" placeholder="Passw3rd">
+        <button @click="login" class="btn btn-primary">Sign In</button>
       </div>
     </section>
     <section>
@@ -30,53 +31,33 @@
 
 <script>
 
-// import { LoginRequest, LoginResponse } from "./proto/auth_pb";
+import { LoginRequest } from "./proto/auth_pb";
 import { AuthClient } from "./proto/auth_grpc_web_pb";
-import "bootstrap/dist/css/bootstrap.css";
-import "bootstrap-vue/dist/bootstrap-vue.css";
+
 export default {
   name: "app",
   components: {},
   data: function() {
     return {
       inputField: "",
-      todos: []
+      todos: [],
+      token: "",
+      username: "",
+      password: ""
     };
   },
   created: function() {
     this.client = new AuthClient("http://localhost:8081", null, null);
   },
   methods: {
-    getTodos: function() {
-      /*
-      let getRequest = new getTodoParams();
-      this.client.getTodos(getRequest, {}, (err, response) => {
-        this.todos = response.toObject().todosList;
-        console.log(this.todos);
-      });
-     */
-    },
-    addTodo: function() {
-      /*
-      let request = new addTodoParams();
-      request.setTask(this.inputField);
-      this.client.addTodo(request, {}, () => {
-        this.inputField = "";
-        this.getTodos();
-      });
-      */
-    },
-    deleteTodo: function() {
-    /*   
-    let deleteRequest = new deleteTodoParams();
-      deleteRequest.setId(todo.id);
-      this.client.deleteTodo(deleteRequest, {}, (err, response) => {
-        if (response.getMessage() === "success") {
-          this.getTodos();
-        }
-      });
-      console.log("todo -> ", todo.id);
-    */ 
+    login: function() {
+        let req = new LoginRequest();
+        req.setUsername(this.username);
+        req.setPassword(this.password);
+        this.client.login(req, {}, (err, resp) => {
+            this.token = resp.ToObject().Token;
+            console.log(this.token); 
+        });
     }
   }
 };
