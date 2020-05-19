@@ -7,21 +7,19 @@ import (
 	"crypto/rand"
 	"fmt"
 	"log"
-	"net"
 	"net/http"
 	"os"
 	"os/signal"
 	"syscall"
 	"time"
 
+	"github.com/nsmith5/talaria/pkg/api"
 	"github.com/nsmith5/talaria/pkg/auth"
 	"github.com/nsmith5/talaria/pkg/kv"
-	gauth "github.com/nsmith5/talaria/pkg/transport/grpc/auth"
 	"github.com/nsmith5/talaria/pkg/users"
 
 	"github.com/oklog/run"
 	"github.com/spf13/cobra"
-	"google.golang.org/grpc"
 )
 
 //go:generate go-bindata -prefix "../../frontend/dist/" -fs ../../frontend/dist/...
@@ -59,11 +57,9 @@ func runServerCmd(cmd *cobra.Command, args []string) {
 		frontend = mux
 	}
 
-	var backend *grpc.Server
+	var backend http.Handler
 	{
-		s := gauth.NewAuthServer(as)
-		backend = grpc.NewServer()
-		gauth.RegisterAuthServer(backend, s)
+		backend = api.New(as)
 	}
 
 	var g run.Group
@@ -82,16 +78,17 @@ func runServerCmd(cmd *cobra.Command, args []string) {
 		})
 	}
 	{
-		lis, err := net.Listen("tcp", fmt.Sprintf(":%d", 14586))
-		if err != nil {
-			log.Fatalf("failed to listen: %v", err)
+		server := &http.Server{
+			Addr:    ":8081",
+			Handler: backend,
 		}
 		g.Add(func() error {
-			log.Print("backend: grpc binding to :14586")
-			return backend.Serve(lis)
+			log.Println("backend: binding to 0.0.0.0:8081")
+			return server.ListenAndServe()
 		}, func(error) {
-			log.Print("backend: shutting down gracefully...")
-			backend.GracefulStop()
+			ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+			defer cancel()
+			server.Shutdown(ctx)
 		})
 	}
 	{
