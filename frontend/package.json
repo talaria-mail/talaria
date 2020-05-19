@@ -5,10 +5,10 @@
   "scripts": {
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build",
+    "generate": "protoc -I ../pkg/transport/grpc/ --js_out=import_style=commonjs,binary:src/proto/ --grpc-web_out=import_style=commonjs,mode=grpcwebtext:src/proto ../pkg/transport/grpc/auth.proto",
     "lint": "vue-cli-service lint"
   },
   "dependencies": {
-    "bootstrap-vue": "^2.14.0",
     "core-js": "^3.6.4",
     "vue": "^2.6.11"
   },
