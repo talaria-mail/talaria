@@ -37,7 +37,12 @@
     },
     "rules": {},
     "overrides": [
-        { "files": "src/proto/*.js", "rules": {"no-unused-expressions": "off"} }
+      {
+        "files": "src/proto/*.js",
+        "rules": {
+          "no-unused-expressions": "off"
+        }
+      }
     ]
   },
   "browserslist": [
