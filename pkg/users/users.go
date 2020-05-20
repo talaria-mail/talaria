@@ -2,7 +2,12 @@ package users
 
 import (
 	"context"
+	"crypto/rand"
+	"encoding/base64"
 	"encoding/json"
+	"golang.org/x/crypto/bcrypt"
+	"io"
+	"log"
 
 	"github.com/nsmith5/talaria/pkg/kv"
 )
@@ -27,7 +32,37 @@ type kvService struct {
 }
 
 func NewService(store kv.Store) Service {
+	service := &kvService{store}
+	ctx := context.Background()
+	_, err := service.Fetch(ctx, `root`)
+	if err == kv.ErrorNotFound {
+		mustCreateRootUser(service)
+	}
+
 	return &kvService{store}
+}
+
+func mustCreateRootUser(srv Service) {
+	var buf [32]byte
+	_, err := io.ReadFull(rand.Reader, buf[:])
+	if err != nil {
+		panic(err)
+	}
+	password := base64.StdEncoding.EncodeToString(buf[:])
+	log.Printf("talaria/users: welcome to talaria! root password is %s", password)
+	hash, err := bcrypt.GenerateFromPassword([]byte(password), 14)
+	if err != nil {
+		panic(err)
+	}
+
+	err = srv.Create(
+		context.Background(),
+		User{Username: `root`, PasswordHash: string(hash)},
+	)
+	if err != nil {
+		panic(err)
+	}
+	return
 }
 
 func (kv *kvService) Create(ctx context.Context, usr User) error {
