@@ -24,7 +24,7 @@ export default {
   align-items: center;
   padding-top: 40px;
   padding-bottom: 40px;
-  background-image: url('./assets/beach.jpg');
+  background-image: url('./assets/beach.webp');
   background-position: center; /* Center the image */
   background-repeat: no-repeat; /* Do not repeat the image */
   background-size: cover; /* Resize the background image to cover the entire container */
