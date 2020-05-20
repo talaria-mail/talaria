@@ -35,15 +35,7 @@
     "parserOptions": {
       "parser": "babel-eslint"
     },
-    "rules": {},
-    "overrides": [
-      {
-        "files": "src/proto/*.js",
-        "rules": {
-          "no-unused-expressions": "off"
-        }
-      }
-    ]
+    "rules": {}
   },
   "browserslist": [
     "> 1%",
