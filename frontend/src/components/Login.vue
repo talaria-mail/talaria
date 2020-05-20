@@ -1,6 +1,6 @@
 <template>
   <div id="login" class="form-signin">
-    <img class="mb-4" src="../assets/logo.png" alt="" width="72" height="72"> 
+    <img class="mb-4" src="../assets/talaria.svg" alt="" width="72" height="72"> 
     <label for="inputEmail" class="sr-only">Email address</label>
     <input v-model="username" v-on:keyup.enter="login" class="form-control" placeholder="Username" required autofocus>
     <label for="inputPassword" class="sr-only">Password</label>
