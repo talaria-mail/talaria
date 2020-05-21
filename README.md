@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="./frontend/src/assets/talaria.svg" alt="Talaria"/>
+  <img src="./frontend/src/assets/talaria.svg" alt="Talaria" width="250px"/>
 </p>
 
 # Talaria
