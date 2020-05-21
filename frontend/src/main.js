@@ -1,13 +1,13 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
 
-import router from "./router/router";
-import store from "./store";
-import App from './App.vue';
+import router from "./router/router"
+import store from "./store"
+import App from './App.vue'
 
-Vue.config.productionTip = false;
+Vue.config.productionTip = false
 
-Vue.use(VueRouter);
+Vue.use(VueRouter)
 
 new Vue({
   router,

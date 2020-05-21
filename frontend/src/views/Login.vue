@@ -1,7 +1,8 @@
 <template>
-  <div id="login"> 
+  <div id="login" class="text-center"> 
     <div class="form-signin">
-      <img class="mb-4" src="../assets/talaria.svg" alt="" width="72" height="72"> 
+      <h1>Talaria</h1>
+      <img class="form-logo mb-4" src="../assets/talaria-light.svg"> 
       <label for="inputEmail" class="sr-only">Email address</label>
       <input v-model="username" v-on:keyup.enter="login" class="form-control" placeholder="Username" required autofocus>
       <label for="inputPassword" class="sr-only">Password</label>
@@ -45,6 +46,7 @@ export default {
 </script>
 
 <style>
+
 #login {
   display: -ms-flexbox;
   display: flex;
@@ -59,6 +61,10 @@ export default {
   height: 100%;
 }
 
+.form-logo {
+  width: 120px;
+}
+
 .form-signin {
   width: 100%;
   max-width: 330px;
@@ -67,6 +73,11 @@ export default {
   border-radius: 5px;
   background-color: #04151c;
   opacity: 0.9;
+}
+
+.form-signin > h1 {
+  color: white;
+  font-family: 'Playfair Display', serif;
 }
 
 .form-signin .checkbox {
