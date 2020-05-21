@@ -30,6 +30,22 @@ var serverCmd = &cobra.Command{
 	Run:   runServerCmd,
 }
 
+// fallbackFS is a http.FileSystem that falls back to a different path when
+// opening an attempted path fails. Useful for serving single path
+// applications.
+type fallbackFS struct {
+	path string
+	next http.FileSystem
+}
+
+func (f fallbackFS) Open(name string) (http.File, error) {
+	file, err := f.next.Open(name)
+	if err != nil {
+		return f.next.Open(f.path)
+	}
+	return file, nil
+}
+
 func runServerCmd(cmd *cobra.Command, args []string) {
 	var store kv.Store = kv.NewMemStore()
 
@@ -53,7 +69,8 @@ func runServerCmd(cmd *cobra.Command, args []string) {
 	var frontend http.Handler
 	{
 		mux := http.NewServeMux()
-		mux.Handle("/", http.FileServer(AssetFile()))
+		fs := AssetFile()
+		mux.Handle("/", http.FileServer(fallbackFS{"index.html", fs}))
 		frontend = mux
 	}
 
