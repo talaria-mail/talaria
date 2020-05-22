@@ -1,6 +1,7 @@
 import Router from "vue-router";
 
-import Login from "../views/Login.vue";
+import Login from "@/views/Login.vue";
+import Main from "@/views/Main.vue"
 
 export default new Router({
   mode: "history",
@@ -10,6 +11,11 @@ export default new Router({
       path: "/login",
       name: "login",
       component: Login
+    },
+    {
+      path: "/",
+      name: "main",
+      component: Main
     }
   ]
 });
