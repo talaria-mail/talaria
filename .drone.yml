@@ -23,3 +23,14 @@ steps:
   when:
     branch:
     - master
+- name: micro-badger
+  image: alpine
+  environment:
+    MICROBADGER_WEBHOOK:
+      from_secret: MICROBADGER_WEBHOOK
+  commands:
+  - apk add curl
+  - curl -X POST ${MICROBADGER_WEBHOOK}
+  when:
+    branch:
+    - master
