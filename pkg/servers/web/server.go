@@ -6,32 +6,20 @@ import (
 	"time"
 )
 
-//go:generate go-bindata -pkg web -prefix "../../../frontend/dist/" -fs ../../../frontend/dist/...
-
-// fallbackFS is a http.FileSystem that falls back to a different path when
-// opening an attempted path fails. Useful for serving single path
-// applications.
-type fallbackFS struct {
-	path string
-	next http.FileSystem
-}
-
-func (f fallbackFS) Open(name string) (http.File, error) {
-	file, err := f.next.Open(name)
-	if err != nil {
-		return f.next.Open(f.path)
-	}
-	return file, nil
-}
-
+// Config is the data needed to configure a web client server. Server binds to
+// Addr and serves the filesystem FileSystem.
 type Config struct {
-	Addr string
+	Addr       string
+	FileSystem http.FileSystem
 }
 
+// Server is a web-client server
 type Server struct {
 	server *http.Server
 }
 
+// New generates a new web client server. Start with Server.Run() and shutdown
+// with Server.Shutdown().
 func New(conf Config) Server {
 	mux := http.NewServeMux()
 	fs := AssetFile()
@@ -44,10 +32,13 @@ func New(conf Config) Server {
 	return Server{server}
 }
 
+// Run starts a web client server. Server binds to address from config and serve
+// filesystem provided.
 func (s Server) Run() error {
 	return s.server.ListenAndServe()
 }
 
+// Shutdown gracefully stops the server
 func (s Server) Shutdown(error) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 	defer cancel()

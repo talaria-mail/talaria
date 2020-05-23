@@ -51,7 +51,8 @@ func runServerCmd(cmd *cobra.Command, args []string) {
 	var frontend web.Server
 	{
 		config := web.Config{
-			Addr: "0.0.0.0:8080",
+			Addr:       "0.0.0.0:8080",
+			FileSystem: web.WithFallback("index.html", AssetFile()),
 		}
 		frontend = web.New(config)
 	}
