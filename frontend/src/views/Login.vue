@@ -4,42 +4,31 @@
       <h1>Talaria</h1>
       <img class="form-logo mb-4" src="../assets/talaria-light.svg"> 
       <label for="inputEmail" class="sr-only">Email address</label>
-      <input v-model="username" v-on:keyup.enter="login" class="form-control" placeholder="Username" required autofocus>
+      <input v-model="username" v-on:keyup.enter="onLogin" class="form-control" placeholder="Username" required autofocus>
       <label for="inputPassword" class="sr-only">Password</label>
-      <input v-model="password" v-on:keyup.enter="login" type="password" class="form-control" placeholder="Password" required>
-      <button @click="login" class="btn btn-lg btn-primary btn-block">Sign in</button>
+      <input v-model="password" v-on:keyup.enter="onLogin" type="password" class="form-control" placeholder="Password" required>
+      <button @click="onLogin" class="btn btn-lg btn-primary btn-block">Sign in</button>
     </div>
   </div>
 </template>
 
 <script>
 
-import { LoginRequest } from "../proto/auth_pb";
-import { AuthClient } from "../proto/auth_grpc_web_pb";
+import { mapActions } from "vuex";
 
 export default {
   name: "login",
   components: {},
   data: function() {
     return {
-      token: "",
       username: "",
       password: ""
     };
   },
-  created: function() {
-    this.client = new AuthClient("http://localhost:8081", null, null);
-  },
   methods: {
-    login: function() {
-        let req = new LoginRequest();
-        req.setUsername(this.username);
-        req.setPassword(this.password);
-        this.client.login(req, {}, (err, resp) => {
-            console.log(err); 
-            this.token = resp.getToken();
-            console.log(this.token); 
-        });
+    ...mapActions(['login']),
+    onLogin() {
+      this.login(this)
     }
   }
 };
