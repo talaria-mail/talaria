@@ -9,7 +9,7 @@ WORKDIR /scratch
 RUN go get github.com/go-bindata/go-bindata/...
 COPY . .
 COPY --from=frontend /scratch/dist frontend/dist
-RUN go generate cmd/talaria/*
+RUN go generate pkg/servers/api/web/*
 RUN CGO_ENABLED=0 go build -o talaria cmd/talaria/*
 
 FROM scratch
