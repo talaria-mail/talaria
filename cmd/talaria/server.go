@@ -6,16 +6,14 @@ import (
 	"crypto/elliptic"
 	"crypto/rand"
 	"fmt"
-	"log"
-	"net/http"
 	"os"
 	"os/signal"
 	"syscall"
-	"time"
 
 	"github.com/nsmith5/talaria/pkg/auth"
 	"github.com/nsmith5/talaria/pkg/kv"
 	"github.com/nsmith5/talaria/pkg/servers/api"
+	"github.com/nsmith5/talaria/pkg/servers/web"
 	"github.com/nsmith5/talaria/pkg/users"
 
 	"github.com/oklog/run"

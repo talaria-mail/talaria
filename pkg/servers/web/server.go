@@ -6,7 +6,7 @@ import (
 	"time"
 )
 
-//go:generate go-bindata -prefix "../../../frontend/dist/" -fs ../../../frontend/dist/...
+//go:generate go-bindata -pkg web -prefix "../../../frontend/dist/" -fs ../../../frontend/dist/...
 
 // fallbackFS is a http.FileSystem that falls back to a different path when
 // opening an attempted path fails. Useful for serving single path
@@ -51,5 +51,5 @@ func (s Server) Run() error {
 func (s Server) Shutdown(error) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 	defer cancel()
-	server.Shutdown(ctx)
+	s.server.Shutdown(ctx)
 }
