@@ -21,13 +21,9 @@ type Server struct {
 // New generates a new web client server. Start with Server.Run() and shutdown
 // with Server.Shutdown().
 func New(conf Config) Server {
-	mux := http.NewServeMux()
-	fs := AssetFile()
-	mux.Handle("/", http.FileServer(fallbackFS{"index.html", fs}))
-
 	server := &http.Server{
 		Addr:    conf.Addr,
-		Handler: mux,
+		Handler: http.FileServer(conf.FileSystem),
 	}
 	return Server{server}
 }
