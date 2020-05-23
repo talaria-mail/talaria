@@ -16,4 +16,5 @@ FROM scratch
 ENV PATH /bin
 COPY --from=backend /scratch/talaria /bin/talaria
 EXPOSE 8080
+EXPOSE 8081
 ENTRYPOINT ["talaria", "server"]
