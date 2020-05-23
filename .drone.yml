@@ -30,7 +30,7 @@ steps:
       from_secret: MICROBADGER_WEBHOOK
   commands:
   - apk add curl
-  - curl -X POST ${MICROBADGER_WEBHOOK}
+  - curl -X POST $${MICROBADGER_WEBHOOK}
   when:
     branch:
     - master
