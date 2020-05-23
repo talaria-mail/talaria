@@ -15,7 +15,7 @@ import (
 
 	"github.com/nsmith5/talaria/pkg/auth"
 	"github.com/nsmith5/talaria/pkg/kv"
-	"github.com/nsmith5/talaria/pkg/transport/grpc"
+	"github.com/nsmith5/talaria/pkg/servers/api"
 	"github.com/nsmith5/talaria/pkg/users"
 
 	"github.com/oklog/run"
@@ -28,22 +28,6 @@ var serverCmd = &cobra.Command{
 	Use:   "server",
 	Short: "Talaria server",
 	Run:   runServerCmd,
-}
-
-// fallbackFS is a http.FileSystem that falls back to a different path when
-// opening an attempted path fails. Useful for serving single path
-// applications.
-type fallbackFS struct {
-	path string
-	next http.FileSystem
-}
-
-func (f fallbackFS) Open(name string) (http.File, error) {
-	file, err := f.next.Open(name)
-	if err != nil {
-		return f.next.Open(f.path)
-	}
-	return file, nil
 }
 
 func runServerCmd(cmd *cobra.Command, args []string) {
@@ -66,48 +50,26 @@ func runServerCmd(cmd *cobra.Command, args []string) {
 		us = auth.OnlyAdmin(us, privateKey.PublicKey)
 	}
 
-	var frontend http.Handler
+	var frontend web.Server
 	{
-		mux := http.NewServeMux()
-		fs := AssetFile()
-		mux.Handle("/", http.FileServer(fallbackFS{"index.html", fs}))
-		frontend = mux
+		config := web.Config{
+			Addr: "0.0.0.0:8080",
+		}
+		frontend = web.New(config)
 	}
 
-	var backend http.Handler
+	var backend api.Server
 	{
-		backend = grpc.NewServer(as)
+		config := api.Config{
+			Auth: as,
+			Addr: "0.0.0.0:8081",
+		}
+		backend = api.New(config)
 	}
 
 	var g run.Group
-	{
-		server := &http.Server{
-			Addr:    ":8080",
-			Handler: frontend,
-		}
-		g.Add(func() error {
-			log.Println("frontend: binding to 0.0.0.0:8080")
-			return server.ListenAndServe()
-		}, func(error) {
-			ctx, cancel := context.WithTimeout(context.Background(), time.Second)
-			defer cancel()
-			server.Shutdown(ctx)
-		})
-	}
-	{
-		server := &http.Server{
-			Addr:    ":8081",
-			Handler: backend,
-		}
-		g.Add(func() error {
-			log.Println("backend: binding to 0.0.0.0:8081")
-			return server.ListenAndServe()
-		}, func(error) {
-			ctx, cancel := context.WithTimeout(context.Background(), time.Second)
-			defer cancel()
-			server.Shutdown(ctx)
-		})
-	}
+	g.Add(frontend.Run, frontend.Shutdown)
+	g.Add(backend.Run, backend.Shutdown)
 	{
 		ctx, cancel := context.WithCancel(context.Background())
 		g.Add(func() error {
