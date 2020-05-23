@@ -1,24 +1,20 @@
-# frontend
+# Talaria | Web client
 
-## Project setup
-```
-yarn install
-```
+This directory hosts the web client for Talaria. The web client is based on a
+[Vue](vuejs.org) single page application. Communication with the backend API is
+done via GRPC.
 
-### Compiles and hot-reloads for development
-```
-yarn serve
-```
+To develop, generate the GRPC server stubs, install dependencies and spin up
+a development server:
 
-### Compiles and minifies for production
-```
-yarn build
+```shell
+$ yarn generate
+$ yarn install
+$ yarn serve
 ```
 
-### Lints and fixes files
-```
-yarn lint
-```
+To generate a production build, run
 
-### Customize configuration
-See [Configuration Reference](https://cli.vuejs.org/config/).
+```shell
+$ yarn build
+```
