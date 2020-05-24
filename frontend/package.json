@@ -5,7 +5,7 @@
   "scripts": {
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build",
-    "generate": "protoc -I ../pkg/servers/api/proto/ --js_out=import_style=commonjs,binary:src/proto/ --grpc-web_out=import_style=commonjs,mode=grpcwebtext:src/proto ../pkg/servers/api/proto/auth.proto",
+    "generate": "protoc -I ../pkg/servers/api/proto/ --js_out=import_style=commonjs:src/proto/ --grpc-web_out=import_style=commonjs,mode=grpcweb:src/proto ../pkg/servers/api/proto/auth.proto",
     "lint": "vue-cli-service lint"
   },
   "dependencies": {
