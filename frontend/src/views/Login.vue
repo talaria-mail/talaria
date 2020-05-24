@@ -1,19 +1,34 @@
 <template>
-  <div id="login" class="text-center"> 
-    <div class="form-signin">
+  <div id="login" class="text-center">
+    <div class="form-signin" id="login-container">
       <h1>Talaria</h1>
-      <img class="form-logo mb-4" src="../assets/talaria-light.svg"> 
+      <img class="form-logo mb-4" src="../assets/talaria-light.svg" />
       <label for="inputEmail" class="sr-only">Email address</label>
-      <input v-model="username" v-on:keyup.enter="onLogin" class="form-control" placeholder="Username" required autofocus>
+      <input
+        v-model="username"
+        v-on:keyup.enter="onLogin"
+        class="form-control"
+        placeholder="Username"
+        required
+        autofocus
+      />
       <label for="inputPassword" class="sr-only">Password</label>
-      <input v-model="password" v-on:keyup.enter="onLogin" type="password" class="form-control" placeholder="Password" required>
-      <button @click="onLogin" class="btn btn-lg btn-primary btn-block">Sign in</button>
+      <input
+        v-model="password"
+        v-on:keyup.enter="onLogin"
+        type="password"
+        class="form-control"
+        placeholder="Password"
+        required
+      />
+      <button @click="onLogin" class="btn btn-lg btn-primary btn-block">
+        Sign in
+      </button>
     </div>
   </div>
 </template>
 
 <script>
-
 import { mapActions } from "vuex";
 
 export default {
@@ -26,16 +41,15 @@ export default {
     };
   },
   methods: {
-    ...mapActions(['login']),
+    ...mapActions(["login"]),
     onLogin() {
-      this.login(this)
+      this.login(this);
     }
   }
 };
 </script>
 
 <style>
-
 #login {
   display: -ms-flexbox;
   display: flex;
@@ -43,7 +57,7 @@ export default {
   align-items: center;
   padding-top: 40px;
   padding-bottom: 40px;
-  background-image: url('./../assets/beach.webp');
+  background-image: url("./../assets/letters.webp");
   background-position: center; /* Center the image */
   background-repeat: no-repeat; /* Do not repeat the image */
   background-size: cover; /* Resize the background image to cover the entire container */
@@ -54,7 +68,7 @@ export default {
   width: 120px;
 }
 
-.form-signin {
+#login-container {
   width: 100%;
   max-width: 330px;
   padding: 30px;
@@ -66,7 +80,7 @@ export default {
 
 .form-signin > h1 {
   color: white;
-  font-family: 'Playfair Display', serif;
+  font-family: "Playfair Display", serif;
 }
 
 .form-signin .checkbox {
