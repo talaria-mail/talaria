@@ -60,8 +60,9 @@ func runServerCmd(cmd *cobra.Command, args []string) {
 	var backend api.Server
 	{
 		config := api.Config{
-			Auth: as,
-			Addr: "0.0.0.0:8081",
+			Auth:        as,
+			UserService: us,
+			Addr:        "0.0.0.0:8081",
 		}
 		backend = api.New(config)
 	}
