@@ -5,7 +5,9 @@ const BACKEND_URL = process.env.API_URL || "http://localhost:8081";
 const client = new AuthClient(BACKEND_URL, null, null);
 
 const state = {
-  token: ""
+  token: "",
+  username: "",
+  admin: false,
 };
 
 const getters = {
@@ -30,7 +32,19 @@ const actions = {
 };
 
 const mutations = {
-  SET_TOKEN: (state, token) => (state.token = token)
+  SET_TOKEN: (state, token) => {
+    if (!token) { 
+      state.token = ''
+      state.username = ''
+      state.admin = false
+      return
+    }
+    state.token = token
+    let payload = token.split('.')[1]
+    let { sub, admin } = JSON.parse(window.atob(payload))
+    state.username = sub
+    state.admin = admin
+  }
 };
 
 export default {
