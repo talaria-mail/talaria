@@ -45,7 +45,7 @@ func runServerCmd(cmd *cobra.Command, args []string) {
 		if err != nil {
 			panic(err)
 		}
-		us = auth.OnlyAdmin(us, privateKey.PublicKey)
+		us = auth.OnlyAdmin(us, &privateKey.PublicKey)
 	}
 
 	var frontend web.Server

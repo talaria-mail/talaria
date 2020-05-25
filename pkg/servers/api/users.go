@@ -3,8 +3,13 @@ package api
 import (
 	"context"
 	"errors"
-	"golang.org/x/crypto/bcrypt"
 
+	"golang.org/x/crypto/bcrypt"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/metadata"
+
+	"github.com/nsmith5/talaria/pkg/auth"
 	"github.com/nsmith5/talaria/pkg/servers/api/proto"
 	"github.com/nsmith5/talaria/pkg/users"
 )
@@ -47,6 +52,16 @@ func (us *usersServer) Create(ctx context.Context, request *proto.CreateUserRequ
 }
 
 func (us *usersServer) Fetch(ctx context.Context, request *proto.FetchUserRequest) (*proto.FetchUserResponse, error) {
+	md, ok := metadata.FromIncomingContext(ctx)
+	if !ok {
+		return nil, grpc.Errorf(codes.Unauthenticated, "valid token required.")
+	}
+	fields := md.Get("authorization")
+	if len(fields) == 0 {
+		return nil, grpc.Errorf(codes.Unauthenticated, "valid token required.")
+	}
+	ctx = auth.WithAuth(ctx, fields[0])
+
 	u, err := us.Service.Fetch(ctx, request.Username)
 	if err != nil {
 		return nil, err

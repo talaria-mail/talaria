@@ -5,9 +5,10 @@ import (
 	"crypto/rand"
 	"encoding/base64"
 	"encoding/json"
-	"golang.org/x/crypto/bcrypt"
 	"io"
 	"log"
+
+	"golang.org/x/crypto/bcrypt"
 
 	"github.com/nsmith5/talaria/pkg/kv"
 )
@@ -57,7 +58,7 @@ func mustCreateRootUser(srv Service) {
 
 	err = srv.Create(
 		context.Background(),
-		User{Username: `root`, PasswordHash: string(hash)},
+		User{Username: `root`, PasswordHash: string(hash), IsAdmin: true},
 	)
 	if err != nil {
 		panic(err)

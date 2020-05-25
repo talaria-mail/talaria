@@ -10,12 +10,12 @@ import (
 
 type onlyAdmin struct {
 	next users.Service
-	key  ecdsa.PublicKey
+	key  *ecdsa.PublicKey
 }
 
 // OnlyAdmin is a user service middleware that restricts user manipulation to
 // admin users
-func OnlyAdmin(next users.Service, key ecdsa.PublicKey) users.Service {
+func OnlyAdmin(next users.Service, key *ecdsa.PublicKey) users.Service {
 	return &onlyAdmin{next, key}
 }
 
@@ -100,9 +100,6 @@ func (oa onlyAdmin) verify(token string) bool {
 		},
 	)
 	if err != nil || !jwttoken.Valid {
-		return false
-	}
-	if !claims["admin"].(bool) {
 		return false
 	}
 	return true
