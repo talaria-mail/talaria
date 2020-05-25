@@ -14,7 +14,7 @@
       class="dropdown-menu dropdown-menu-right"
       aria-labelledby="dropdownMenuButton"
     >
-      <button class="dropdown-item">Profile</button>
+      <button class="dropdown-item" v-on:click="handleProfile">Profile</button>
       <button class="dropdown-item" v-on:click="handleLogout">Log out</button>
       <div class="dropdown-divider"></div>
       <a class="dropdown-item" href="#">Admin</a>
@@ -30,7 +30,10 @@ export default {
     ...mapActions(['logout']),
     handleLogout() {
       this.logout(this)
-    }
+    },
+    handleProfile() {
+      this.$router.push('/profile') 
+    },
   }  
 }
 </script>

@@ -1,7 +1,8 @@
-import Router from "vue-router";
+import Router from "vue-router"
 
-import Login from "@/views/Login.vue";
-import Main from "@/views/Main.vue"
+import Login from '@/views/Login.vue'
+import Main from '@/views/Main.vue'
+import UserProfile from '@/components/UserProfile.vue'
 
 export default new Router({
   mode: "history",
@@ -16,7 +17,14 @@ export default new Router({
       path: "/",
       name: "main",
       component: Main,
-      meta: { authenticated: true }
+      children: [
+        {
+          path: "/profile",
+          name: "profile",
+          component: UserProfile,
+          meta: { authenticated: true },
+        }
+      ]
     }
   ]
 });
