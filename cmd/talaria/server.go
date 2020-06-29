@@ -13,6 +13,7 @@ import (
 	"github.com/nsmith5/talaria/pkg/auth"
 	"github.com/nsmith5/talaria/pkg/kv"
 	"github.com/nsmith5/talaria/pkg/servers/api"
+	"github.com/nsmith5/talaria/pkg/servers/submission"
 	"github.com/nsmith5/talaria/pkg/servers/web"
 	"github.com/nsmith5/talaria/pkg/users"
 
@@ -67,9 +68,21 @@ func runServerCmd(cmd *cobra.Command, args []string) {
 		backend = api.New(config)
 	}
 
+	var sub submission.Server
+	{
+		config := submission.Config{
+			Addr:      "0.0.0.0:8465",
+			Auth:      as,
+			Domain:    "",
+			TLSConfig: nil,
+		}
+		sub = submission.New(config)
+	}
+
 	var g run.Group
 	g.Add(frontend.Run, frontend.Shutdown)
 	g.Add(backend.Run, backend.Shutdown)
+	g.Add(sub.Run, sub.Shutdown)
 	{
 		ctx, cancel := context.WithCancel(context.Background())
 		g.Add(func() error {
