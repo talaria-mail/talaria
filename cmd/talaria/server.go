@@ -5,7 +5,9 @@ import (
 	"crypto/ecdsa"
 	"crypto/elliptic"
 	"crypto/rand"
+	"crypto/tls"
 	"fmt"
+	"log"
 	"os"
 	"os/signal"
 	"syscall"
@@ -70,11 +72,15 @@ func runServerCmd(cmd *cobra.Command, args []string) {
 
 	var sub submission.Server
 	{
+		cert, err := tls.LoadX509KeyPair("certs/cert.pem", "certs/key.pem")
+		if err != nil {
+			log.Fatal(err)
+		}
 		config := submission.Config{
-			Addr:      "0.0.0.0:8465",
+			Addr:      ":8465",
 			Auth:      as,
-			Domain:    "",
-			TLSConfig: nil,
+			Domain:    "localhost",
+			TLSConfig: &tls.Config{Certificates: []tls.Certificate{cert}},
 		}
 		sub = submission.New(config)
 	}

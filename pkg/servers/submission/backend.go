@@ -17,7 +17,11 @@ func (b *backend) Login(state *smtp.ConnectionState, username, password string) 
 	ctx := context.Background()
 	token, err := b.auth.Login(ctx, username, password)
 	if err != nil {
-		return nil, err
+		return nil, &smtp.SMTPError{
+			Code:         535,
+			EnhancedCode: smtp.EnhancedCode{5, 3, 5},
+			Message:      "Authentication failed",
+		}
 	}
 	ctx = auth.WithAuth(ctx, token)
 	return &session{ctx}, nil

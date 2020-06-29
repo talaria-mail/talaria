@@ -12,7 +12,7 @@ import (
 type Config struct {
 	Addr      string
 	Auth      auth.Authenticator
-	TLSConfig tls.Config
+	TLSConfig *tls.Config
 	Domain    string
 }
 
@@ -30,7 +30,7 @@ func New(cfg Config) Server {
 	s := smtp.NewServer(&b)
 	s.Addr = cfg.Addr
 	s.Domain = cfg.Domain
-	s.TLSConfig = &cfg.TLSConfig
+	s.TLSConfig = cfg.TLSConfig
 
 	s.LMTP = false
 	s.MaxRecipients = 50
