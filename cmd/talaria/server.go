@@ -5,7 +5,9 @@ import (
 	"crypto/ecdsa"
 	"crypto/elliptic"
 	"crypto/rand"
+	"crypto/tls"
 	"fmt"
+	"log"
 	"os"
 	"os/signal"
 	"syscall"
@@ -13,6 +15,7 @@ import (
 	"github.com/nsmith5/talaria/pkg/auth"
 	"github.com/nsmith5/talaria/pkg/kv"
 	"github.com/nsmith5/talaria/pkg/servers/api"
+	"github.com/nsmith5/talaria/pkg/servers/submission"
 	"github.com/nsmith5/talaria/pkg/servers/web"
 	"github.com/nsmith5/talaria/pkg/users"
 
@@ -67,9 +70,25 @@ func runServerCmd(cmd *cobra.Command, args []string) {
 		backend = api.New(config)
 	}
 
+	var sub submission.Server
+	{
+		cert, err := tls.LoadX509KeyPair("certs/cert.pem", "certs/key.pem")
+		if err != nil {
+			log.Fatal(err)
+		}
+		config := submission.Config{
+			Addr:      ":8465",
+			Auth:      as,
+			Domain:    "localhost",
+			TLSConfig: &tls.Config{Certificates: []tls.Certificate{cert}},
+		}
+		sub = submission.New(config)
+	}
+
 	var g run.Group
 	g.Add(frontend.Run, frontend.Shutdown)
 	g.Add(backend.Run, backend.Shutdown)
+	g.Add(sub.Run, sub.Shutdown)
 	{
 		ctx, cancel := context.WithCancel(context.Background())
 		g.Add(func() error {
