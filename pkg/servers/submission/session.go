@@ -4,37 +4,64 @@ import (
 	"context"
 	"io"
 	"io/ioutil"
-	"log"
 
 	smtp "github.com/emersion/go-smtp"
+	"github.com/nsmith5/talaria/pkg/auth"
 )
 
 // A Session is returned after successful login.
 type session struct {
-	ctx context.Context
+	ctx  context.Context
+	from *string
+	to   []string
+	data *string
 }
 
 func (s *session) Mail(from string, opts smtp.MailOptions) error {
-	log.Println("Mail from:", from)
-	return nil
+	select {
+	case <-s.ctx.Done():
+		return s.ctx.Err()
+	default:
+		s.from = &from
+		return nil
+	}
 }
 
 func (s *session) Rcpt(to string) error {
-	log.Println("Rcpt to:", to)
-	return nil
+	select {
+	case <-s.ctx.Done():
+		return s.ctx.Err()
+	default:
+		s.to = append(s.to, to)
+		return nil
+	}
 }
 
 func (s *session) Data(r io.Reader) error {
-	if b, err := ioutil.ReadAll(r); err != nil {
+	b, err := ioutil.ReadAll(r)
+	if err != nil {
 		return err
-	} else {
-		log.Println("Data:", string(b))
 	}
+
+	data := string(b)
+	s.data = &data
+
 	return nil
 }
 
-func (s *session) Reset() {}
+func (s *session) Reset() {
+	s.from = nil
+	s.to = nil
+	s.data = nil
+}
 
 func (s *session) Logout() error {
+	// Set JWT to empty
+	s.ctx = auth.WithAuth(s.ctx, "")
+
+	// Cancel the context
+	ctx, cancel := context.WithCancel(s.ctx)
+	cancel()
+	s.ctx = ctx
 	return nil
 }

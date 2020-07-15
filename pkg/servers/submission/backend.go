@@ -24,7 +24,7 @@ func (b *backend) Login(state *smtp.ConnectionState, username, password string) 
 		}
 	}
 	ctx = auth.WithAuth(ctx, token)
-	return &session{ctx}, nil
+	return &session{ctx: ctx}, nil
 }
 
 // AnonymousLogin requires clients to authenticate using SMTP AUTH before sending emails
