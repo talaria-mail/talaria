@@ -1,6 +1,7 @@
 package imap
 
 import (
+	"context"
 	"errors"
 	"time"
 
@@ -12,6 +13,7 @@ const delimiter = `/`
 
 type mailbox struct {
 	core.Mailbox
+	subscribed bool
 }
 
 func (mb *mailbox) Info() (*imap.MailboxInfo, error) {
@@ -28,19 +30,87 @@ func (mb *mailbox) Name() string {
 }
 
 func (mb *mailbox) Status(items []imap.StatusItem) (*imap.MailboxStatus, error) {
-	return nil, errors.New("not implimented")
+	status := imap.NewMailboxStatus(mb.Name(), items)
+	status.Flags = core.AllFlags.Strings()
+	status.PermanentFlags = core.AllFlags.Strings()
+	{
+		msg, err := mb.First(context.Background(), core.QueryUnseen)
+		if err != nil {
+			return nil, err
+		}
+		status.UnseenSeqNum = uint32(msg.Offset)
+	}
+
+	for _, name := range items {
+		switch name {
+		case imap.StatusMessages:
+			count, err := mb.Count(context.Background(), core.QueryExists)
+			if err != nil {
+				return nil, err
+			}
+			status.Messages = uint32(count)
+
+		case imap.StatusUidNext:
+			msg, err := mb.Last(context.Background(), core.QueryExists)
+			if err != nil {
+				return nil, err
+			}
+			status.UidNext = uint32(msg.ID + 1)
+
+		case imap.StatusUidValidity:
+			status.UidValidity = 1
+
+		case imap.StatusRecent:
+			count, err := mb.Count(context.Background(), core.QueryRecent)
+			if err != nil {
+				return nil, err
+			}
+			status.Recent = uint32(count)
+
+		case imap.StatusUnseen:
+			count, err := mb.Count(context.Background(), core.QueryUnseen)
+			if err != nil {
+				return nil, err
+			}
+			status.Unseen = uint32(count)
+		}
+	}
+
+	return status, nil
 }
 
 func (mb *mailbox) SetSubscribed(subscribed bool) error {
-	return errors.New("not implimented")
+	mb.subscribed = true
+	return nil
 }
 
 func (mb *mailbox) Check() error {
-	return errors.New("not implimented")
+	return nil
 }
 
 func (mb *mailbox) ListMessages(uid bool, seqset *imap.SeqSet, items []imap.FetchItem, ch chan<- *imap.Message) error {
-	return errors.New("not implimented")
+	defer close(ch)
+	if seqset == nil {
+		return errors.New(`nil sequence set`)
+	}
+
+	for _, seq := range seqset.Set {
+		msgs, err := mb.Find(context.Background(), func(msg core.Message) bool {
+			return seq.Contains(uint32(msg.Offset))
+		})
+		if err != nil {
+			return err
+		}
+
+		for _, msg := range msgs {
+			imsg, err := asIMAPMessage(msg, items)
+			if err != nil {
+				return err
+			}
+			ch <- imsg
+		}
+	}
+	return nil
 }
 
 func (mb *mailbox) SearchMessages(uid bool, criteria *imap.SearchCriteria) ([]uint32, error) {

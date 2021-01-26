@@ -29,7 +29,7 @@ func (u *user) ListMailboxes(subscribed bool) ([]backend.Mailbox, error) {
 
 	var imbxs []backend.Mailbox
 	for _, mbx := range mbxs {
-		imbx := &mailbox{mbx}
+		imbx := &mailbox{mbx, false}
 		imbxs = append(imbxs, imbx)
 	}
 	return imbxs, nil
@@ -44,7 +44,7 @@ func (u *user) GetMailbox(name string) (backend.Mailbox, error) {
 		// TODO: Handle other errors here perhaps
 		return nil, backend.ErrNoSuchMailbox
 	}
-	return &mailbox{mbx}, nil
+	return &mailbox{mbx, false}, nil
 }
 
 // CreateMailbox creates a new mailbox.
