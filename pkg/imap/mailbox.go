@@ -16,6 +16,17 @@ type mailbox struct {
 	subscribed bool
 }
 
+func queryByID(seq imap.Seq) core.MessageQuery {
+	return func(msg core.Message) bool {
+		return seq.Contains(uint32(msg.ID))
+	}
+}
+func queryByOffset(seq imap.Seq) core.MessageQuery {
+	return func(msg core.Message) bool {
+		return seq.Contains(uint32(msg.Offset))
+	}
+}
+
 func (mb *mailbox) Info() (*imap.MailboxInfo, error) {
 	info := &imap.MailboxInfo{
 		Name:       mb.Mailbox.Name(),
@@ -94,10 +105,15 @@ func (mb *mailbox) ListMessages(uid bool, seqset *imap.SeqSet, items []imap.Fetc
 		return errors.New(`nil sequence set`)
 	}
 
+	var query func(seq imap.Seq) core.MessageQuery
+	if uid {
+		query = queryByID
+	} else {
+		query = queryByOffset
+	}
+
 	for _, seq := range seqset.Set {
-		msgs, err := mb.Find(context.Background(), func(msg core.Message) bool {
-			return seq.Contains(uint32(msg.Offset))
-		})
+		msgs, err := mb.Find(context.Background(), query(seq))
 		if err != nil {
 			return err
 		}
@@ -122,6 +138,33 @@ func (mb *mailbox) CreateMessage(flags []string, date time.Time, body imap.Liter
 }
 
 func (mb *mailbox) UpdateMessagesFlags(uid bool, seqset *imap.SeqSet, operation imap.FlagsOp, flags []string) error {
+	if seqset == nil {
+		return errors.New(`nil sequence set`)
+	}
+
+	var query func(seq imap.Seq) core.MessageQuery
+	if uid {
+		query = queryByID
+	} else {
+		query = queryByOffset
+	}
+
+	for _, seq := range seqset.Set {
+		msgs, err := mb.Find(context.Background(), query(seq))
+		if err != nil {
+			return err
+		}
+
+		for _, msg := range msgs {
+			imsg, err := asIMAPMessage(msg, items)
+			if err != nil {
+				return err
+			}
+			ch <- imsg
+		}
+	}
+	return nil
+
 	return errors.New("not implimented")
 }
 
