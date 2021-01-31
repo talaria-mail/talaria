@@ -10,8 +10,8 @@ import (
 const errTemplate = `
 `
 
-func makeFailure(msg talaria.OutboundMessage, err error) talaria.InboundMessage {
-	var r talaria.InboundMessage
+func makeFailure(msg talaria.EventOutbound, err error) talaria.EventInbound {
+	var r talaria.EventInbound
 
 	now := time.Now()
 

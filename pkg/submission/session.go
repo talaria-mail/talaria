@@ -12,13 +12,13 @@ import (
 )
 
 type session struct {
-	msg       *talaria.OutboundMessage
+	msg       *talaria.EventOutbound
 	publisher pubsub.Publisher
 }
 
 func (s *session) Mail(from string, opts smtp.MailOptions) error {
 	// Allocate new message
-	s.msg = new(talaria.OutboundMessage)
+	s.msg = new(talaria.EventOutbound)
 
 	addr, err := mail.ParseAddress(from)
 	if err != nil {

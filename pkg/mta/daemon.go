@@ -41,7 +41,7 @@ func (c *Daemon) Run() error {
 			switch msg := event.(type) {
 
 			// Only subscribe to outbound message events
-			case *talaria.OutboundMessage:
+			case *talaria.EventOutbound:
 
 				// Loop the recepients and try to sent to each one
 				for _, to := range msg.To {

@@ -16,10 +16,10 @@ type PubSubMiddleware struct {
 // Publish logs event and then publishes to Next
 func (ps *PubSubMiddleware) Publish(ctx context.Context, evt interface{}) error {
 	switch msg := evt.(type) {
-	case *talaria.OutboundMessage:
-		log.Printf("pubsub: method=Publish type=OutboundMessage from=%s to=%s", msg.From, msg.To)
-	case *talaria.InboundMessage:
-		log.Printf("pubsub: method=Publish type=InboundMessage to=%s", msg.To)
+	case *talaria.EventOutbound:
+		log.Printf("pubsub: method=Publish type=EventOutbound from=%s to=%s", msg.From, msg.To)
+	case *talaria.EventInbound:
+		log.Printf("pubsub: method=Publish type=EventInbound to=%s", msg.To)
 	}
 	return ps.Next.Publish(ctx, evt)
 }
