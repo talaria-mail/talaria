@@ -1,20 +1,18 @@
-package event
+package pubsub
 
 import (
 	"sync"
-
-	"code.nfsmith.ca/nsmith/talaria/pkg/talaria"
 )
 
 type subscriber struct {
 	sync.Mutex
 
-	handler chan *talaria.Event
+	handler chan interface{}
 	quit    chan struct{}
 	done    bool
 }
 
-func (s *subscriber) publish(evt *talaria.Event) {
+func (s *subscriber) publish(evt interface{}) {
 	select {
 	case <-s.quit:
 	case s.handler <- evt:

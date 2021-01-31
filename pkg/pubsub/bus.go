@@ -1,26 +1,24 @@
-package event
+package pubsub
 
 import (
 	"context"
 	"sync"
-
-	"code.nfsmith.ca/nsmith/talaria/pkg/talaria"
 )
 
-type bus struct {
+type pubsub struct {
 	sync.Mutex
 
 	subs map[*subscriber]struct{}
 }
 
-// NewBus returns a buffered event bus
-func NewBus() talaria.Bus {
-	return &bus{
+// NewPubSub returns a buffered event bus
+func NewPubSub() PubSub {
+	return &pubsub{
 		subs: map[*subscriber]struct{}{},
 	}
 }
 
-func (b *bus) Publish(ctx context.Context, evt *talaria.Event) error {
+func (b *pubsub) Publish(ctx context.Context, evt interface{}) error {
 	b.Lock()
 	defer b.Unlock()
 	for s := range b.subs {
@@ -29,10 +27,10 @@ func (b *bus) Publish(ctx context.Context, evt *talaria.Event) error {
 	return nil
 }
 
-func (b *bus) Subscribe(ctx context.Context) (<-chan *talaria.Event, <-chan error) {
+func (b *pubsub) Subscribe(ctx context.Context) (<-chan interface{}, <-chan error) {
 	b.Lock()
 	s := &subscriber{
-		handler: make(chan *talaria.Event, 100),
+		handler: make(chan interface{}, 100),
 		quit:    make(chan struct{}),
 	}
 	b.subs[s] = struct{}{}
