@@ -10,7 +10,6 @@ type Config struct {
 	Addr              string
 	Domain            string
 	AllowInsecureAuth bool
-	Publisher         pubsub.Publisher
 }
 
 func defaults(conf Config) Config {
@@ -27,21 +26,25 @@ func defaults(conf Config) Config {
 
 // Server is a submission server
 type Server struct {
+	Config Config
+	Pub    pubsub.Publisher
+
 	s *smtp.Server
 }
 
-func (s *Server) Start(conf Config) error {
-	conf = defaults(conf)
+func (s *Server) Run() error {
+	s.Config = defaults(s.Config)
 
-	s.s = smtp.NewServer(&backend{publisher: conf.Publisher})
+	s.s = smtp.NewServer(&backend{publisher: s.Pub})
 
-	s.s.Domain = conf.Domain
-	s.s.Addr = conf.Addr
-	s.s.AllowInsecureAuth = conf.AllowInsecureAuth
+	s.s.Domain = s.Config.Domain
+	s.s.Addr = s.Config.Addr
+	s.s.AllowInsecureAuth = s.Config.AllowInsecureAuth
 
 	return s.s.ListenAndServe()
 }
 
-func (s *Server) Close() error {
-	return s.s.Close()
+func (s *Server) Shutdown(error) {
+	s.s.Close()
+	return
 }

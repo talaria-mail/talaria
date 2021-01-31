@@ -4,6 +4,8 @@ import "net/mail"
 
 // InboundMessage signals a message from the outside world to a users mailbox
 type InboundMessage struct {
+	To mail.Address
+
 	Message Message
 }
 

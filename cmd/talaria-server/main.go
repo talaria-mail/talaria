@@ -6,8 +6,10 @@ import (
 	"os"
 	"os/signal"
 	"syscall"
+	"time"
 
 	"code.nfsmith.ca/nsmith/talaria/pkg/logging"
+	"code.nfsmith.ca/nsmith/talaria/pkg/mta"
 	"code.nfsmith.ca/nsmith/talaria/pkg/pubsub"
 	"code.nfsmith.ca/nsmith/talaria/pkg/submission"
 	"github.com/oklog/run"
@@ -18,35 +20,47 @@ type Config struct {
 }
 
 func main() {
+	conf := Config{
+		submission: submission.Config{
+			Addr:              ":6666",
+			Domain:            "localhost",
+			AllowInsecureAuth: true,
+		},
+	}
+
+	// Pubsub event bus
 	var ps pubsub.PubSub
 	{
 		ps = pubsub.NewPubSub()
 		ps = &logging.PubSubMiddleware{Next: ps}
 	}
 
-	conf := Config{
-		submission: submission.Config{
-			Addr:              ":6666",
-			Domain:            "localhost",
-			AllowInsecureAuth: true,
-			Publisher:         ps,
-		},
+	// Submission server
+	var sub = submission.Server{
+		Config: conf.submission,
+		Pub:    ps,
 	}
 
-	var subsServer submission.Server
+	// MTA Sender
+	var sender mta.Sender
+	{
+		sender = &mta.MailSender{
+			Domain:  "localhost",
+			Timeout: 10 * time.Second,
+		}
+		sender = logging.MTAMiddleware(sender)
+	}
 
+	var daemon = &mta.Daemon{
+		PubSub: ps,
+		Sender: sender,
+	}
+
+	// Error group orchestrates all of our processes together
 	var g run.Group
 
-	// Submission server
-	g.Add(
-		func() error {
-			return subsServer.Start(conf.submission)
-		}, func(err error) {
-			fmt.Println(err)
-			subsServer.Close()
-			return
-		},
-	)
+	g.Add(sub.Run, sub.Shutdown)
+	g.Add(daemon.Run, daemon.Shutdown)
 
 	// Signal handler
 	{
