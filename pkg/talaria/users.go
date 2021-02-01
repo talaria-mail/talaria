@@ -16,7 +16,7 @@ type User struct {
 // UserStore manages users
 type UserStore interface {
 	Create(ctx context.Context, username, password string) error
-	Get(ctx context.Context, id []byte) (*User, error)
+	Get(ctx context.Context, username string) (*User, error)
 	Update(ctx context.Context, user User) error
-	Delete(ctx context.Context, id []byte) error
+	Delete(ctx context.Context, username string) error
 }
