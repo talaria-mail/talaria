@@ -9,21 +9,23 @@ import (
 	"golang.org/x/crypto/curve25519"
 )
 
-func encrypt(pub [32]byte, plain []byte) (encrypted []byte, err error) {
+// Encrypt uses a Curve25519 public key to encrypt `plain` using ECIES.
+// Chacha20Poly1305 is used as the AEAD.
+func Encrypt(pub []byte, plain []byte) (encrypted []byte, err error) {
 	// Generate a random curve25519 key pair
-	var epub, epriv [32]byte
-	_, err = io.ReadFull(rand.Reader, epriv[:])
+	epriv, epub, err := NewKeyPair()
 	if err != nil {
 		return
 	}
-	curve25519.ScalarBaseMult(&epub, &epriv)
 
-	// ECDH to create a shared secret
-	var shared [32]byte
-	curve25519.ScalarMult(&shared, &epriv, &pub)
+	// ECDH exchange to create a shared secret
+	shared, err := curve25519.X25519(epriv, pub)
+	if err != nil {
+		return
+	}
 
 	// chacha20poly1305 aead encrypt plain with shared secret
-	aead, err := chacha20poly1305.NewX(shared[:])
+	aead, err := chacha20poly1305.NewX(shared)
 	if err != nil {
 		return nil, err
 	}
@@ -36,23 +38,26 @@ func encrypt(pub [32]byte, plain []byte) (encrypted []byte, err error) {
 
 	encrypted = aead.Seal(nonce, nonce, plain, nil)
 
-	// Append ephemeral public key to message
+	// Prepend ephemeral public key to message
 	encrypted = append(epub[:], encrypted...)
 	return
 }
 
-func decrypt(priv [32]byte, encrypted []byte) (plain []byte, err error) {
+// Decrypt uses a Curve25519 private key to decrypt `encrypted` using ECIES.
+// Chacha20Poly1305 is used as the AEAD.
+func Decrypt(priv []byte, encrypted []byte) (plain []byte, err error) {
 	// Split ephemeral key out
-	var epub [32]byte
-	copy(epub[:], encrypted[:32])
+	epub := encrypted[:32]
 	encrypted = encrypted[32:]
 
 	// ECDH to create a shared secret
-	var shared [32]byte
-	curve25519.ScalarMult(&shared, &priv, &epub)
+	shared, err := curve25519.X25519(priv, epub)
+	if err != nil {
+		return
+	}
 
 	// chacha20poly1305 aead encrypt plain with shared secret
-	aead, err := chacha20poly1305.NewX(shared[:])
+	aead, err := chacha20poly1305.NewX(shared)
 	if err != nil {
 		return nil, err
 	}

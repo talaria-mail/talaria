@@ -2,30 +2,24 @@ package encryption
 
 import (
 	"bytes"
-	"crypto/rand"
-	"io"
 	"testing"
-
-	"golang.org/x/crypto/curve25519"
 )
 
 func TestEncryption(t *testing.T) {
 	// Generate key pair
-	var pub, priv [32]byte
-	_, err := io.ReadFull(rand.Reader, priv[:])
+	priv, pub, err := NewKeyPair()
 	if err != nil {
-		t.Fatal("Failed to create private key")
+		t.Fatal(`Failed to generate key pair`)
 	}
-	curve25519.ScalarBaseMult(&pub, &priv)
 
 	want := []byte(`this is my message`)
 
-	encrypted, err := encrypt(pub, want)
+	encrypted, err := Encrypt(pub, want)
 	if err != nil {
 		t.Fatal("Failed to encrypt")
 	}
 
-	got, err := decrypt(priv, encrypted)
+	got, err := Decrypt(priv, encrypted)
 	if err != nil {
 		t.Fatal("Failed to decrypt")
 	}
