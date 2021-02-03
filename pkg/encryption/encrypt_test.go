@@ -27,4 +27,24 @@ func TestEncryption(t *testing.T) {
 	if bytes.Compare(got, want) != 0 {
 		t.Error("Failed to recover message")
 	}
+
+	_, err = Decrypt(make([]byte, 32), encrypted)
+	if err == nil {
+		t.Error("Decryption with an invalid private key shouldn't work")
+	}
+
+	_, err = Decrypt(make([]byte, 30), encrypted)
+	if err == nil {
+		t.Error("Decryption with an short private key shouldn't work")
+	}
+
+	_, err = Decrypt(make([]byte, 34), encrypted)
+	if err == nil {
+		t.Error("Decryption with an long private key shouldn't work")
+	}
+
+	_, err = Encrypt(make([]byte, 32), want)
+	if err == nil {
+		t.Error("Encryption with bad public key shouldn't wor")
+	}
 }
