@@ -11,9 +11,9 @@ type boltKV struct {
 	bucket []byte
 }
 
-// NewBoltStore is a simple boltdb based key-value store
-func NewBoltStore(path, bucket string) (Store, error) {
-	db, err := bolt.Open(path, 0666, nil)
+// NewBolt is a simple boltdb based key-value store
+func NewBolt(path, bucket string) (Store, error) {
+	db, err := bolt.Open(path, 0600, nil)
 	if err != nil {
 		return nil, err
 	}

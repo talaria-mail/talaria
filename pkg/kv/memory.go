@@ -6,7 +6,7 @@ import (
 
 type memKV map[string][]byte
 
-func NewMemStore() Store {
+func NewInMemory() Store {
 	return make(memKV)
 }
 

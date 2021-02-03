@@ -7,7 +7,7 @@ import (
 )
 
 func TestBasics(t *testing.T) {
-	kv := NewMemStore()
+	kv := NewInMemory()
 	value := []byte(`value`)
 	ctx := context.Background()
 
@@ -37,7 +37,7 @@ func TestBasics(t *testing.T) {
 }
 
 func TestCancelation(t *testing.T) {
-	kv := NewMemStore()
+	kv := NewInMemory()
 	value := []byte(`value`)
 	ctx, cancel := context.WithCancel(context.Background())
 

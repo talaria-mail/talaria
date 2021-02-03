@@ -15,7 +15,7 @@ func TestBoltBasics(t *testing.T) {
 	}
 	defer os.Remove(dbfile.Name())
 
-	kv, err := NewBoltStore(dbfile.Name(), "bucket")
+	kv, err := NewBolt(dbfile.Name(), "bucket")
 	if err != nil {
 		t.Fatal("Couldn't make file")
 	}
@@ -45,7 +45,7 @@ func TestBoltCancelation(t *testing.T) {
 	}
 	defer os.Remove(dbfile.Name())
 
-	kv, err := NewBoltStore(dbfile.Name(), "bucket")
+	kv, err := NewBolt(dbfile.Name(), "bucket")
 	if err != nil {
 		t.Fatal("Couldn't make file")
 	}
