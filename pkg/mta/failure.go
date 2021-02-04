@@ -4,17 +4,20 @@ import (
 	"fmt"
 	"time"
 
-	"code.nfsmith.ca/nsmith/talaria/pkg/talaria"
+	"code.nfsmith.ca/nsmith/talaria/pkg/pubsub"
 )
 
 const errTemplate = `
 `
 
-func makeFailure(msg talaria.EventOutbound, err error) talaria.EventInbound {
-	var r talaria.EventInbound
+func makeFailure(msg pubsub.EventOutbound, err error) pubsub.EventInbound {
+	var r pubsub.EventInbound
 
 	now := time.Now()
 
+	// Pass along context from outbound message. This threading means encryption
+	// context for the user will pass back with this failure message
+	r.Context = msg.Context
 	r.To = msg.From
 	r.Message.Header = map[string][]string{
 		"To":      {r.To.String()},

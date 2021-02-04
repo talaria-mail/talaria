@@ -5,7 +5,6 @@ import (
 	"log"
 
 	"code.nfsmith.ca/nsmith/talaria/pkg/pubsub"
-	"code.nfsmith.ca/nsmith/talaria/pkg/talaria"
 )
 
 // PubSubMiddleware logs pubsub events
@@ -16,9 +15,9 @@ type PubSubMiddleware struct {
 // Publish logs event and then publishes to Next
 func (ps *PubSubMiddleware) Publish(ctx context.Context, evt interface{}) error {
 	switch msg := evt.(type) {
-	case *talaria.EventOutbound:
+	case *pubsub.EventOutbound:
 		log.Printf("pubsub: method=Publish type=EventOutbound from=%s to=%s", msg.From, msg.To)
-	case *talaria.EventInbound:
+	case *pubsub.EventInbound:
 		log.Printf("pubsub: method=Publish type=EventInbound to=%s", msg.To)
 	}
 	return ps.Next.Publish(ctx, evt)

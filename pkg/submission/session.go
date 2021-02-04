@@ -2,30 +2,42 @@ package submission
 
 import (
 	"context"
+	"errors"
 	"io"
 	"io/ioutil"
 	"net/mail"
 
+	"code.nfsmith.ca/nsmith/talaria/pkg/encryption"
+	"code.nfsmith.ca/nsmith/talaria/pkg/identity"
+	tmail "code.nfsmith.ca/nsmith/talaria/pkg/mail"
 	"code.nfsmith.ca/nsmith/talaria/pkg/pubsub"
-	"code.nfsmith.ca/nsmith/talaria/pkg/talaria"
 	smtp "github.com/emersion/go-smtp"
 )
 
 type session struct {
-	msg       *talaria.EventOutbound
+	msg       *pubsub.EventOutbound
 	publisher pubsub.Publisher
+	user      identity.User
 }
 
 func (s *session) Mail(from string, opts smtp.MailOptions) error {
 	// Allocate new message
-	s.msg = new(talaria.EventOutbound)
+	s.msg = &pubsub.EventOutbound{
+		Context: encryption.WithKey(context.Background(), s.user.ContentKey.Public),
+	}
 
+	// Parse address
 	addr, err := mail.ParseAddress(from)
 	if err != nil {
 		return err
 	}
 	s.msg.From = *addr
 
+	// Check if From address is allowed for this user
+	err = tmail.AllowedAlias(addr.Address, s.user.EmailAliases)
+	if err != nil {
+		return errors.New(`invalid from address`)
+	}
 	return nil
 }
 

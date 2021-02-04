@@ -1,6 +1,7 @@
 package submission
 
 import (
+	"code.nfsmith.ca/nsmith/talaria/pkg/identity"
 	"code.nfsmith.ca/nsmith/talaria/pkg/pubsub"
 	smtp "github.com/emersion/go-smtp"
 )
@@ -28,6 +29,7 @@ func defaults(conf Config) Config {
 type Server struct {
 	Config Config
 	Pub    pubsub.Publisher
+	ID     identity.Service
 
 	s *smtp.Server
 }
@@ -35,7 +37,7 @@ type Server struct {
 func (s *Server) Run() error {
 	s.Config = defaults(s.Config)
 
-	s.s = smtp.NewServer(&backend{publisher: s.Pub})
+	s.s = smtp.NewServer(&backend{publisher: s.Pub, id: s.ID})
 
 	s.s.Domain = s.Config.Domain
 	s.s.Addr = s.Config.Addr

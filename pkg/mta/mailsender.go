@@ -10,7 +10,7 @@ import (
 	"strings"
 	"time"
 
-	"code.nfsmith.ca/nsmith/talaria/pkg/talaria"
+	tmail "code.nfsmith.ca/nsmith/talaria/pkg/mail"
 )
 
 // MailSender sends mails and satifies the Sender interface
@@ -20,7 +20,7 @@ type MailSender struct {
 	Timeout  time.Duration
 }
 
-func (s *MailSender) Send(from mail.Address, to mail.Address, msg talaria.Message) error {
+func (s *MailSender) Send(from mail.Address, to mail.Address, msg tmail.Message) error {
 	d, err := domain(to.Address)
 	if err != nil {
 		return err
