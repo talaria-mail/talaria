@@ -21,28 +21,5 @@ it easy for you to host your own email.
 - Exhaustive compliance with all protocols
 - High scalability or high availability
 
-## Build & Run
-
-To run the lastest container image:
-
-```
-$ docker run -p 8080:8080 -p 8081:8081 nsmith5/talaria
-```
-
-To compile from source:
-
-```shell
-$ git clone https://github.com/nsmith5/talaria
-$ pushd talaria
-$ pushd frontend
-$ yarn install
-$ yarn build
-$ popd
-$ go get github.com/go-bindata/go-bindata/...
-$ go generate cmd/talaria/*    # Use go-bindata to bundle frontend into go binary
-$ go build -o talaria cmd/talaria/*
-$ ./talaria server
-```
-
 [drone-badge]: https://cloud.drone.io/api/badges/talaria-mail/talaria/status.svg
 [drone-link]: https://cloud.drone.io/talaria-mail/talaria

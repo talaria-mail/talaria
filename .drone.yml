@@ -5,12 +5,6 @@ steps:
   image: golang:1.14
   commands:
   - go test -v -cover ./pkg/...
-- name: frontend
-  image: node:12
-  commands:
-  - cd frontend
-  - yarn install
-  - yarn build
 - name: docker
   image: plugins/docker
   settings:
@@ -20,17 +14,6 @@ steps:
       from_secret: dockerhub_username
     password:
       from_secret: dockerhub_password
-  when:
-    branch:
-    - master
-- name: micro-badger
-  image: alpine
-  environment:
-    MICROBADGER_WEBHOOK:
-      from_secret: MICROBADGER_WEBHOOK
-  commands:
-  - apk add curl
-  - curl -X POST $${MICROBADGER_WEBHOOK}
   when:
     branch:
     - master
