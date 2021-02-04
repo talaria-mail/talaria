@@ -3,6 +3,7 @@ package mta
 import (
 	"context"
 
+	"code.nfsmith.ca/nsmith/talaria/pkg/mail"
 	"code.nfsmith.ca/nsmith/talaria/pkg/pubsub"
 )
 
@@ -35,7 +36,7 @@ func (c *Daemon) Run() error {
 			switch msg := event.(type) {
 
 			// Only subscribe to outbound message events
-			case *pubsub.EventOutbound:
+			case *mail.EventOutbound:
 
 				// Loop the recepients and try to sent to each one
 				for _, to := range msg.To {

@@ -15,14 +15,14 @@ import (
 )
 
 type session struct {
-	msg       *pubsub.EventOutbound
+	msg       *tmail.EventOutbound
 	publisher pubsub.Publisher
 	user      identity.User
 }
 
 func (s *session) Mail(from string, opts smtp.MailOptions) error {
 	// Allocate new message
-	s.msg = &pubsub.EventOutbound{
+	s.msg = &tmail.EventOutbound{
 		Context: encryption.WithKey(context.Background(), s.user.ContentKey.Public),
 	}
 

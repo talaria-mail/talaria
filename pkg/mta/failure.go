@@ -4,14 +4,14 @@ import (
 	"fmt"
 	"time"
 
-	"code.nfsmith.ca/nsmith/talaria/pkg/pubsub"
+	"code.nfsmith.ca/nsmith/talaria/pkg/mail"
 )
 
 const errTemplate = `
 `
 
-func makeFailure(msg pubsub.EventOutbound, err error) pubsub.EventInbound {
-	var r pubsub.EventInbound
+func makeFailure(msg mail.EventOutbound, err error) mail.EventInbound {
+	var r mail.EventInbound
 
 	now := time.Now()
 
