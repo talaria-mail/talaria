@@ -1,4 +1,6 @@
 version: 2.1
+orbs:
+  docker: circleci/docker@1.5.0
 jobs:
   build:
     docker: 
@@ -7,3 +9,25 @@ jobs:
     - checkout
     - run: go test -v -cover ./pkg/...
     - run: go build -o talaria cmd/talaria-server/*
+  docker:
+    executor: docker/docker
+    steps:
+    - setup_remote_docker
+    - checkout
+    - docker/check
+    - docker/build:
+        image: talariamail/talaria
+    - docker/push:
+        image: talariamail/talaria
+workflows:
+  default:
+    jobs:
+    - build
+    - docker:
+        context:
+        - docker
+        requires:
+        - build
+        filters:
+          branches:
+            only: main
