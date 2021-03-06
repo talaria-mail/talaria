@@ -1,0 +1,9 @@
+version: 2.1
+jobs:
+  build:
+    docker: 
+    - image: cimg/go:1.16
+    steps:
+    - checkout
+    - run: go test -v -cover ./pkg/...
+    - run: go build -o talaria cmd/talaria-server/*
