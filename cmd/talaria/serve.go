@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"crypto/tls"
 	"fmt"
 	"log"
 	"os"
@@ -27,6 +28,21 @@ func NewServeCmd() *cobra.Command {
 }
 
 func RunServeCmd(cmd *cobra.Command, args []string) {
+	// TLS
+	var tlsConf *tls.Config
+	var err error
+	if conf.TLS.Generate {
+		tlsConf, err = TLSFromScratch(conf.Domain)
+		if err != nil {
+			panic(err)
+		}
+	} else {
+		tlsConf, err = TLSFromFiles(conf.TLS.Cert, conf.TLS.Key)
+		if err != nil {
+			panic(err)
+		}
+	}
+
 	// Pubsub event bus
 	var ps pubsub.PubSub
 	{
@@ -37,9 +53,9 @@ func RunServeCmd(cmd *cobra.Command, args []string) {
 	// Submission server
 	var sub = submission.Server{
 		Config: submission.Config{
-			Addr:              fmt.Sprintf("0.0.0.0:%d", conf.Submission.Port),
-			Domain:            conf.Domain,
-			AllowInsecureAuth: true,
+			Addr:   fmt.Sprintf("0.0.0.0:%d", conf.Submission.Port),
+			Domain: conf.Domain,
+			TLS:    *tlsConf,
 		},
 		Pub: ps,
 	}
@@ -82,7 +98,7 @@ func RunServeCmd(cmd *cobra.Command, args []string) {
 		})
 	}
 
-	err := g.Run()
+	err = g.Run()
 	if err != nil {
 		log.Println(err)
 	}
