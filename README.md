@@ -4,7 +4,7 @@
 
 # Talaria
 
-[![Build Status][drone-badge]][drone-link]
+[![Build Status][ci-badge]][ci-link]
 
 Talaria is an effort to create an email server that goes out of its way to make
 it easy for you to host your own email.
@@ -21,5 +21,5 @@ it easy for you to host your own email.
 - Exhaustive compliance with all protocols
 - High scalability or high availability
 
-[drone-badge]: https://cloud.drone.io/api/badges/talaria-mail/talaria/status.svg
-[drone-link]: https://cloud.drone.io/talaria-mail/talaria
+[ci-badge]: https://circleci.com/gh/talaria-mail/talaria.svg?style=shield
+[ci-link]: https://circleci.com/gh/talaria-mail/talaria
