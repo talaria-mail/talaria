@@ -17,10 +17,6 @@ import (
 	"github.com/spf13/cobra"
 )
 
-type Config struct {
-	submission submission.Config
-}
-
 func NewServeCmd() *cobra.Command {
 	var cmd = &cobra.Command{
 		Use:   "serve",
@@ -31,14 +27,6 @@ func NewServeCmd() *cobra.Command {
 }
 
 func RunServeCmd(cmd *cobra.Command, args []string) {
-	conf := Config{
-		submission: submission.Config{
-			Addr:              ":6666",
-			Domain:            "localhost",
-			AllowInsecureAuth: true,
-		},
-	}
-
 	// Pubsub event bus
 	var ps pubsub.PubSub
 	{
@@ -48,15 +36,19 @@ func RunServeCmd(cmd *cobra.Command, args []string) {
 
 	// Submission server
 	var sub = submission.Server{
-		Config: conf.submission,
-		Pub:    ps,
+		Config: submission.Config{
+			Addr:              fmt.Sprintf("0.0.0.0:%d", conf.Submission.Port),
+			Domain:            conf.Domain,
+			AllowInsecureAuth: true,
+		},
+		Pub: ps,
 	}
 
 	// MTA Sender
 	var sender mta.Sender
 	{
 		sender = &mta.MailSender{
-			Domain:  "localhost",
+			Domain:  conf.Domain,
 			Timeout: 10 * time.Second,
 		}
 		sender = logging.MTAMiddleware(sender)
