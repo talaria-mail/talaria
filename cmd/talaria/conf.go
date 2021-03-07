@@ -10,6 +10,12 @@ import (
 type Config struct {
 	Domain string `yaml:"domain"`
 
+	TLS struct {
+		Generate bool   `yaml:"generate"`
+		Cert     string `yaml:"cert"`
+		Key      string `yaml:"key"`
+	} `yaml:"tls"`
+
 	Submission struct {
 		Port int `yaml:"port"`
 	} `yaml:"submission"`

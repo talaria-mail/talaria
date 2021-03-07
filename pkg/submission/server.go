@@ -1,6 +1,8 @@
 package submission
 
 import (
+	"crypto/tls"
+
 	"code.nfsmith.ca/nsmith/talaria/pkg/identity"
 	"code.nfsmith.ca/nsmith/talaria/pkg/pubsub"
 	smtp "github.com/emersion/go-smtp"
@@ -8,9 +10,9 @@ import (
 
 // Config configures a submission server
 type Config struct {
-	Addr              string
-	Domain            string
-	AllowInsecureAuth bool
+	Addr   string
+	Domain string
+	TLS    tls.Config
 }
 
 func defaults(conf Config) Config {
@@ -41,9 +43,10 @@ func (s *Server) Run() error {
 
 	s.s.Domain = s.Config.Domain
 	s.s.Addr = s.Config.Addr
-	s.s.AllowInsecureAuth = s.Config.AllowInsecureAuth
+	s.s.AllowInsecureAuth = false
+	s.s.TLSConfig = &s.Config.TLS
 
-	return s.s.ListenAndServe()
+	return s.s.ListenAndServeTLS()
 }
 
 func (s *Server) Shutdown(error) {
