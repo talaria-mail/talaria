@@ -8,7 +8,7 @@ jobs:
     steps:
     - checkout
     - run: go test -v -cover ./pkg/...
-    - run: go build -o talaria cmd/talaria-server/*
+    - run: go build -o talaria cmd/talaria/*
   docker:
     executor: docker/docker
     steps:

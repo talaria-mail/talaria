@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
+	"log"
 	"os"
 	"os/signal"
 	"syscall"
@@ -13,13 +14,23 @@ import (
 	"code.nfsmith.ca/nsmith/talaria/pkg/pubsub"
 	"code.nfsmith.ca/nsmith/talaria/pkg/submission"
 	"github.com/oklog/run"
+	"github.com/spf13/cobra"
 )
 
 type Config struct {
 	submission submission.Config
 }
 
-func main() {
+func NewServeCmd() *cobra.Command {
+	var cmd = &cobra.Command{
+		Use:   "serve",
+		Short: "Run Talaria server daemon",
+		Run:   RunServeCmd,
+	}
+	return cmd
+}
+
+func RunServeCmd(cmd *cobra.Command, args []string) {
 	conf := Config{
 		submission: submission.Config{
 			Addr:              ":6666",
@@ -81,6 +92,6 @@ func main() {
 
 	err := g.Run()
 	if err != nil {
-		fmt.Println(err)
+		log.Println(err)
 	}
 }
