@@ -42,6 +42,7 @@ func RunServeCmd(cmd *cobra.Command, args []string) {
 			panic(err)
 		}
 	}
+	tlsConf.MinVersion = tls.VersionTLS13
 
 	// Pubsub event bus
 	var ps pubsub.PubSub
@@ -55,7 +56,7 @@ func RunServeCmd(cmd *cobra.Command, args []string) {
 		Config: submission.Config{
 			Addr:   fmt.Sprintf("0.0.0.0:%d", conf.Submission.Port),
 			Domain: conf.Domain,
-			TLS:    *tlsConf,
+			TLS:    tlsConf,
 		},
 		Pub: ps,
 	}

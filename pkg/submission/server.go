@@ -2,6 +2,7 @@ package submission
 
 import (
 	"crypto/tls"
+	"time"
 
 	"code.nfsmith.ca/nsmith/talaria/pkg/identity"
 	"code.nfsmith.ca/nsmith/talaria/pkg/pubsub"
@@ -12,7 +13,7 @@ import (
 type Config struct {
 	Addr   string
 	Domain string
-	TLS    tls.Config
+	TLS    *tls.Config
 }
 
 func defaults(conf Config) Config {
@@ -44,7 +45,10 @@ func (s *Server) Run() error {
 	s.s.Domain = s.Config.Domain
 	s.s.Addr = s.Config.Addr
 	s.s.AllowInsecureAuth = false
-	s.s.TLSConfig = &s.Config.TLS
+	s.s.Strict = true
+	s.s.TLSConfig = s.Config.TLS
+	s.s.ReadTimeout = 30 * time.Second
+	s.s.WriteTimeout = 30 * time.Second
 
 	return s.s.ListenAndServeTLS()
 }
