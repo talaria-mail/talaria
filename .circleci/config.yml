@@ -24,7 +24,7 @@ jobs:
 workflows:
   default:
     jobs:
-    - build
+    - build:
         filters:
           tags:
             only: /^v.*/
