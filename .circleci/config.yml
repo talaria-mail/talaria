@@ -17,8 +17,10 @@ jobs:
     - docker/check
     - docker/build:
         image: talariamail/talaria
+        tag: $CIRCLE_TAG
     - docker/push:
         image: talariamail/talaria
+        tag: $CIRCLE_TAG
 workflows:
   default:
     jobs:
@@ -29,5 +31,7 @@ workflows:
         requires:
         - build
         filters:
+          tags:
+            only: /^v.*/
           branches:
             only: main
