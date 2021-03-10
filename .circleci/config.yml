@@ -25,6 +25,9 @@ workflows:
   default:
     jobs:
     - build
+        filters:
+          tags:
+            only: /^v.*/
     - docker:
         context:
         - docker
