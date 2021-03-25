@@ -5,6 +5,7 @@
 # Talaria
 
 [![Build Status][ci-badge]][ci-link]
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Ftalaria-mail%2Ftalaria.svg?type=shield)](https://app.fossa.com/projects/git%2Bgithub.com%2Ftalaria-mail%2Ftalaria?ref=badge_shield)
 
 Talaria is an effort to create an email server that goes out of its way to make
 it easy for you to host your own email.
@@ -23,3 +24,7 @@ it easy for you to host your own email.
 
 [ci-badge]: https://circleci.com/gh/talaria-mail/talaria.svg?style=shield
 [ci-link]: https://circleci.com/gh/talaria-mail/talaria
+
+
+## License
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Ftalaria-mail%2Ftalaria.svg?type=large)](https://app.fossa.com/projects/git%2Bgithub.com%2Ftalaria-mail%2Ftalaria?ref=badge_large)
